@@ -7,8 +7,8 @@ import 'package:todoapp/service/todoService.dart';
 class TodoBloc extends Bloc<TodoEvent, TodoState> {
   final TodoService todoService;
 
-  int skip = 0; // Keep track of the offset for pagination
-  final int limit = 10; // Number of todos to load per request
+  int skip = 0;
+  final int limit = 10;
 
   TodoBloc(this.todoService) : super(TodoInitial()) {
     on<FetchTodos>(_onFetchTodos);
@@ -20,7 +20,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     try {
       emit(TodoLoading());
       final todoResponse = await todoService.fetchTodos(limit: limit, skip: 0);
-      skip = todoResponse.todos.length; // Update the skip count
+      skip = todoResponse.todos.length; // Update skip with fetched todos count
       emit(TodoLoaded(todoResponse.todos, totalTodos: todoResponse.total)); // Pass total count
     } catch (e) {
       emit(TodoError('Failed to fetch todos'));
@@ -31,28 +31,37 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     if (state is TodoLoaded) {
       final currentState = state as TodoLoaded;
 
-      // Stop loading if all todos are loaded
+      // Debug print
+      print('Loading more todos... current length: ${currentState.todos.length}');
+
       if (currentState.todos.length >= currentState.totalTodos) {
+        print('No more todos to load.');
         return;
       }
 
       try {
-        emit(TodoLoaded(currentState.todos, isLoadingMore: true, totalTodos: currentState.totalTodos)); // Set loading more to true
+        emit(TodoLoaded(currentState.todos, isLoadingMore: true, totalTodos: currentState.totalTodos));
         final todoResponse = await todoService.fetchTodos(limit: event.limit, skip: event.skip);
 
         if (todoResponse.todos.isEmpty) {
-          return; // No more todos to load
+          print('No new todos received from the service.');
+          return;
         }
 
-        skip += todoResponse.todos.length; // Increment the skip value
+        // Debug print
+        print('New todos received: ${todoResponse.todos.length}');
+
+        skip += todoResponse.todos.length;
         final allTodos = List<Todo>.from(currentState.todos)..addAll(todoResponse.todos);
 
-        emit(TodoLoaded(allTodos, totalTodos: currentState.totalTodos)); // Emit the updated list
+        emit(TodoLoaded(allTodos, totalTodos: currentState.totalTodos));
       } catch (e) {
+        print('Error loading more todos: $e');
         emit(TodoError('Failed to load more todos'));
       }
     }
   }
+
 
   Future<void> _onUpdateTodo(UpdateTodo event, Emitter<TodoState> emit) async {
     if (state is TodoLoaded) {

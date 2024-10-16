@@ -1,7 +1,7 @@
 class Todo {
   final int id;
   final String todo;
-  final bool completed;
+  late final bool completed;
   final int userId;
 
   Todo({
@@ -11,7 +11,27 @@ class Todo {
     required this.userId,
   });
 
-  // Add the copyWith method
+  // Factory method to create a Todo instance from a JSON object
+  factory Todo.fromJson(Map<String, dynamic> json) {
+    return Todo(
+      id: json['id'],
+      todo: json['todo'],
+      completed: json['completed'],
+      userId: json['userId'],
+    );
+  }
+
+  // Method to convert a Todo instance to a JSON object
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'todo': todo,
+      'completed': completed,
+      'userId': userId,
+    };
+  }
+
+  // Method to create a copy of a Todo with optional new values
   Todo copyWith({
     int? id,
     String? todo,
@@ -25,17 +45,8 @@ class Todo {
       userId: userId ?? this.userId,
     );
   }
-
-  // Factory method to create Todo from JSON
-  factory Todo.fromJson(Map<String, dynamic> json) {
-    return Todo(
-      id: json['id'],
-      todo: json['todo'],
-      completed: json['completed'],
-      userId: json['userId'],
-    );
-  }
 }
+
 
 
 class TodoResponse {
