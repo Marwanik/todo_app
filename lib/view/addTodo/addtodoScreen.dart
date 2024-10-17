@@ -13,6 +13,7 @@ import 'package:todoapp/model/todoModel.dart'; // Import Todo model
 
 class AddTodoScreen extends StatelessWidget {
   final TextEditingController _todoController = TextEditingController();
+  final Color progressIndicatorColor = const Color(0xF055847A); // Custom color
 
   // Save the new todo to SharedPreferences
   Future<void> _saveTaskToSharedPreferences(Todo task) async {
@@ -67,7 +68,7 @@ class AddTodoScreen extends StatelessWidget {
                         id: DateTime.now().millisecondsSinceEpoch,
                         todo: todoText,
                         completed: false,
-                        userId: 5,
+                        userId: 5, deletedOn: '',
                       );
 
                       // Save the new task to SharedPreferences
@@ -84,7 +85,9 @@ class AddTodoScreen extends StatelessWidget {
                 },
                 builder: (context, state) {
                   if (state is AddTodoLoading) {
-                    return CircularProgressIndicator();
+                    return CircularProgressIndicator(
+                  color: progressIndicatorColor,
+                  );
                   }
                   return CustomButton(
                     text: 'Add to List',

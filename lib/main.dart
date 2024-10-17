@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todoapp/bloc/onboarding/onboarding_bloc.dart';
+import 'package:todoapp/bloc/onboarding/onboarding_event.dart';
 import 'package:todoapp/bloc/splash/splash_bloc.dart';
 import 'package:todoapp/bloc/todo/todo_bloc.dart';
 import 'package:todoapp/bloc/todo/todo_event.dart';
@@ -15,10 +17,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Bloc.observer = MyBlocObserver();
   await setup();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -34,6 +38,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => AddTodoBloc(core.get<AddTodoService>()), // Add AddTodoBloc provider
+        ),
+        BlocProvider(
+          create: (context) => OnboardingBloc()..add(CheckOnboardingStatus()), // Add OnboardingBloc provider
         ),
       ],
       child: MaterialApp(

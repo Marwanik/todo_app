@@ -5,7 +5,7 @@ class TaskItem extends StatelessWidget {
   final bool completed;
   final ValueChanged<bool?> onChanged;  // Add a callback for state change
 
-  const TaskItem({
+  const TaskItem({super.key,
     required this.task,
     required this.completed,
     required this.onChanged,  // Pass the callback in the constructor

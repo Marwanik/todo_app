@@ -1,49 +1,66 @@
 class Todo {
   final int id;
   final String todo;
-  late final bool completed;
+  final bool completed;
   final int userId;
+  final bool? isDeleted; // Add isDeleted
+  final String? deletedOn; // Make sure this field exists to store the deletion time
 
   Todo({
     required this.id,
     required this.todo,
     required this.completed,
     required this.userId,
+    this.isDeleted,
+    required this.deletedOn, // Include this field
   });
 
-  // Factory method to create a Todo instance from a JSON object
   factory Todo.fromJson(Map<String, dynamic> json) {
     return Todo(
       id: json['id'],
       todo: json['todo'],
       completed: json['completed'],
       userId: json['userId'],
+      isDeleted: json['isDeleted'],
+      deletedOn: json['deletedOn'], // Ensure this is parsed from API response
     );
   }
 
-  // Method to convert a Todo instance to a JSON object
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'todo': todo,
       'completed': completed,
       'userId': userId,
+      'isDeleted': isDeleted,
+      'deletedOn': deletedOn, // Include in serialization
     };
   }
 
-  // Method to create a copy of a Todo with optional new values
+
+// Method to create a copy of a Todo with optional new values
   Todo copyWith({
     int? id,
     String? todo,
     bool? completed,
     int? userId,
+    bool? isDeleted,
+    String? deletedOn,
   }) {
     return Todo(
       id: id ?? this.id,
       todo: todo ?? this.todo,
       completed: completed ?? this.completed,
       userId: userId ?? this.userId,
+      isDeleted: isDeleted ?? this.isDeleted,
+      deletedOn: deletedOn ?? this.deletedOn,
     );
+  }
+
+  // Override toString method for better debugging output
+  @override
+  String toString() {
+    return 'Todo { id: $id, todo: $todo, completed: $completed, userId: $userId, isDeleted: $isDeleted, deletedOn: $deletedOn }';
   }
 }
 
@@ -52,14 +69,14 @@ class Todo {
 class TodoResponse {
   final List<Todo> todos;
   final int total;
-  final int skip;
-  final int limit;
+  final int?skip;
+  final int? limit;
 
   TodoResponse({
     required this.todos,
     required this.total,
-    required this.skip,
-    required this.limit,
+     this.skip,
+     this.limit,
   });
 
   factory TodoResponse.fromJson(Map<String, dynamic> json) {

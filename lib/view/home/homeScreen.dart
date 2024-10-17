@@ -6,11 +6,20 @@ import 'package:todoapp/bloc/todo/todo_bloc.dart';
 import 'package:todoapp/bloc/todo/todo_event.dart';
 import 'package:todoapp/bloc/todo/todo_state.dart';
 import 'package:todoapp/design/widgets/backgroundWidget.dart';
-import 'package:todoapp/design/widgets/taskitemWidget.dart';
 import 'package:todoapp/model/todoModel.dart';
 import 'package:todoapp/service/todoService.dart';
 import 'package:todoapp/view/addTodo/addtodoScreen.dart';
 import 'package:todoapp/view/login/login.dart';
+
+// Add a capitalize extension for String
+extension StringExtension on String {
+  String capitalize() {
+    if (this == null || isEmpty) {
+      return '';
+    }
+    return this[0].toUpperCase() + substring(1);
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -49,27 +58,229 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Add new todo to saved list and prevent duplication
-  Future<void> _addNewTodoToSharedPreferences(Todo newTodo) async {
+  Future<void> _addNewTodoToSaved(Todo newTodo) async {
     setState(() {
-      // Check if the todo already exists before adding it
       if (!savedTodos.any((todo) => todo.id == newTodo.id)) {
         savedTodos.insert(0, newTodo); // Prepend the new todo to the list
+        _showLocalUpdateDialog(context, newTodo, 'added');
       }
     });
     _saveTodosToSharedPreferences(); // Save updated list
   }
 
-  // Scroll listener to trigger pagination
+  Future<void> _showDeleteConfirmation(BuildContext context, Todo todo, bool isLocalTodo) async {
+    bool isConfirmed = false;
+
+    // Step 1: Show confirmation dialog
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false, // Prevent closing by tapping outside the dialog
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Todo'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to delete this todo?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text('Delete'),
+              onPressed: () {
+                isConfirmed = true;
+                Navigator.of(context).pop(); // Close the dialog first
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    // Step 2: If confirmed, proceed to delete
+    if (isConfirmed) {
+      if (isLocalTodo) {
+        _deleteTodoFromSaved(todo); // Delete from local saved todos
+        _showLocalDeleteDialog(context, todo); // Show local delete confirmation
+      } else {
+        // For API delete, listen for the response
+        context.read<TodoBloc>().add(DeleteTodo(todo.id));
+
+        // Step 3: Listen for the API response and update the same dialog
+        await showDialog<void>(
+          context: context,
+          barrierDismissible: false, // Prevent closing by tapping outside the dialog
+          builder: (BuildContext context) {
+            return BlocListener<TodoBloc, TodoState>(
+              listener: (context, state) {
+                if (state is TodoDeletedSuccess) {
+                  Navigator.of(context).pop(); // Close the waiting dialog
+                  _showApiDeleteDialog(context, state.deletedTodo); // Show the delete response in a new dialog
+                } else if (state is TodoError) {
+                  Navigator.of(context).pop(); // Close the waiting dialog
+                  _showErrorDialog(context, state.message); // Show error if any
+                }
+              },
+              child: AlertDialog(
+                title: Text('Wait For Success Deleting'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+
+                    Row(mainAxisAlignment:MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();  // Close the dialog
+                          },
+                          child: Text('OK'),
+                        ),
+                      ],
+                    ),                  ],
+                ),
+              ),
+            );
+          },
+        );
+      }
+    }
+  }
+
+  // Delete a todo from savedTodos (local deletion)
+  void _deleteTodoFromSaved(Todo todo) {
+    setState(() {
+      savedTodos.removeWhere((t) => t.id == todo.id);
+      _saveTodosToSharedPreferences(); // Update SharedPreferences
+    });
+    _showLocalDeleteDialog(context, todo);
+  }
+
+  // Show Dialog for local update response
+  void _showLocalUpdateDialog(BuildContext context, Todo updatedTodo, String operation) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent the dialog from being dismissed by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Todo ${operation.capitalize()} Locally'),
+          content: Text(
+            'Todo ID: ${updatedTodo.id}\n'
+                'Title: ${updatedTodo.todo}\n'
+                'Completed: ${updatedTodo.completed ? "Yes" : "No"}',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();  // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Show detailed delete response in a dialog for local deletion
+  void _showLocalDeleteDialog(BuildContext context, Todo deletedTodo) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent the dialog from being dismissed by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Todo Deleted Locally'),
+          content: Text(
+            'Todo ID: ${deletedTodo.id}\n'
+                'Title: ${deletedTodo.todo}\n'
+                'Completed: ${deletedTodo.completed ? "Yes" : "No"}',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();  // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Show API update response in a dialog
+  void _showApiUpdateDialog(BuildContext context, Todo updatedTodo) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent the dialog from being dismissed by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Todo Updated via API'),
+          content: Text(
+            'Todo ID: ${updatedTodo.id}\n'
+                'Title: ${updatedTodo.todo}\n'
+                'Completed: ${updatedTodo.completed ? "Yes" : "No"}',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();  // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Show API delete response in a dialog
+  void _showApiDeleteDialog(BuildContext context, Todo deletedTodo) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent the dialog from being dismissed by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Todo Deleted Successfully'),
+          content: Text(
+            'Delete successful:\n'
+                'ID: ${deletedTodo.id}\n'
+                'Title: ${deletedTodo.todo}\n'
+                'Completed: ${deletedTodo.completed ? "Yes" : "No"}\n'
+                'User ID: ${deletedTodo.userId}\n'
+                'Deleted On: ${deletedTodo.deletedOn ?? "Unknown"}\n'
+                'Is Deleted: ${deletedTodo.isDeleted != null ? "Yes" : "No"}',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();  // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
+
+  // Handle scroll and pagination
   void _onScroll() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent &&
-        !_isPaginating) {
-      // When at the bottom of the list, trigger pagination
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !_isPaginating) {
       context.read<TodoBloc>().add(LoadMoreTodos(limit: 10, skip: context.read<TodoBloc>().skip));
       setState(() {
-        _isPaginating = true; // Start paginating
+        _isPaginating = true;
       });
 
-      // Automatically stop the loading spinner after 3 seconds
       Future.delayed(Duration(seconds: 3), () {
         if (mounted) {
           setState(() {
@@ -80,13 +291,32 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Logout functionality, clear cache and navigate to login screen
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // Clear all data from SharedPreferences
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LoginScreen()), // Navigate back to login screen
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+    );
+  }
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -95,174 +325,180 @@ class _HomeScreenState extends State<HomeScreen> {
     return BlocProvider(
       create: (context) => TodoBloc(TodoService())..add(FetchTodos()),
       child: BackgroundWidget(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(height: MediaQuery.sizeOf(context).height * .05),
-            Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Image.asset(
-                'assets/images/home/home.png',
+        child: BlocListener<TodoBloc, TodoState>(
+          listener: (context, state) {
+            if (state is TodoUpdated) {
+              _showApiUpdateDialog(context, state.todo);
+            } else if (state is TodoDeletedSuccess) {
+              _showApiDeleteDialog(context, state.deletedTodo);  // This will show the dialog for the API delete success
+            } else if (state is TodoError) {
+              _showErrorDialog(context, state.message);
+            }
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: MediaQuery.sizeOf(context).height * .05),
+              Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Image.asset('assets/images/home/home.png'),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 30.0, right: 30.0),  // Align logout icon
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,  // Align the title and logout icon
-                children: [
-                  Text(
-                    'Todo Tasks',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+              Padding(
+                padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Todo Tasks',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
-                    textAlign: TextAlign.left,
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.exit_to_app, color: Colors.red),
-                    onPressed: _logout,  // Call the logout function
-                  ),
-                ],
+                    IconButton(
+                      icon: Icon(Icons.exit_to_app, color: Colors.red),
+                      onPressed: _logout,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        spreadRadius: 2,
-                        blurRadius: 10,
-                        offset: Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Dairy Tasks',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () async {
-                                final result = await Navigator.push<Todo>(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => AddTodoScreen()), // Navigate to AddTodoScreen
-                                );
-                                if (result != null) {
-                                  // Now you're working with the Todo object
-                                  _addNewTodoToSharedPreferences(result); // Save the new todo to SharedPreferences
-                                }
-                              },
-                              icon: Icon(Icons.add),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-
-                        // Display saved todos first, followed by fetched todos
-                        Expanded(
-                          child: BlocBuilder<TodoBloc, TodoState>(
-                            builder: (context, state) {
-                              if (state is TodoLoading) {
-                                // Show loading indicator while fetching the first set of todos
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    color: progressIndicatorColor, // Custom color
-                                  ),
-                                );
-                              } else if (state is TodoLoaded) {
-                                // Combine saved todos (newly added) at the top, fetched todos below
-                                final todos = [...savedTodos, ...state.todos]; // Local saved todos first, fetched todos below
-
-                                return NotificationListener<ScrollNotification>(
-                                  onNotification: (ScrollNotification scrollInfo) {
-                                    if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
-                                        !(state.isLoadingMore) &&
-                                        state.todos.length < state.totalTodos) {
-                                      // When reaching the bottom of the list, load more todos
-                                      context.read<TodoBloc>().add(
-                                        LoadMoreTodos(
-                                          limit: 10,
-                                          skip: context.read<TodoBloc>().skip,
-                                        ),
-                                      );
-                                      return true;
-                                    }
-                                    return false;
-                                  },
-                                  child: ListView.builder(
-                                    controller: _scrollController,
-                                    itemCount: todos.length + (_isPaginating ? 1 : 0), // Add extra item if paginating
-                                    itemBuilder: (context, index) {
-                                      if (index == todos.length) {
-                                        // Show pagination loading indicator at the bottom
-                                        return Center(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: CircularProgressIndicator(
-                                              color: progressIndicatorColor, // Custom color
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                      final todo = todos[index];
-                                      return TaskItem(
-                                        task: todo.todo,
-                                        completed: todo.completed,
-                                        onChanged: (bool? value) {
-                                          setState(() {
-                                            // Instead of directly setting the 'completed' field, use copyWith to create a new instance with updated completed value
-                                            final updatedTodo = todo.copyWith(completed: value ?? false);
-
-                                            // Update the local savedTodos and save it to SharedPreferences if it's a local todo
-                                            if (index < savedTodos.length) {
-                                              savedTodos[index] = updatedTodo;
-                                              _saveTodosToSharedPreferences();
-                                            } else {
-                                              // Dispatch UpdateTodo event to the Bloc if it's a fetched todo
-                                              context.read<TodoBloc>().add(
-                                                UpdateTodo(updatedTodo),
-                                              );
-                                            }
-                                          });
-                                        },
-                                      );
-
-
-                                    },
-                                  ),
-                                );
-                              } else if (state is TodoError) {
-                                return Center(
-                                  child: Text(state.message),
-                                );
-                              }
-                              return Center(child: Text('No Tasks Found'));
-                            },
-                          ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          spreadRadius: 2,
+                          blurRadius: 10,
+                          offset: Offset(0, 10),
                         ),
                       ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Dairy Tasks',
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              IconButton(
+                                onPressed: () async {
+                                  final result = await Navigator.push<Todo>(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => AddTodoScreen()),
+                                  );
+                                  if (result != null) {
+                                    _addNewTodoToSaved(result);
+                                  }
+                                },
+                                icon: Icon(Icons.add),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                          Expanded(
+                            child: BlocBuilder<TodoBloc, TodoState>(
+                              builder: (context, state) {
+                                if (state is TodoLoading) {
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      color: progressIndicatorColor,
+                                    ),
+                                  );
+                                } else if (state is TodoLoaded) {
+                                  final todos = [
+                                    ...savedTodos,
+                                    ...state.todos
+                                  ];
+
+                                  return NotificationListener<ScrollNotification>(
+                                      onNotification: (ScrollNotification scrollInfo) {
+                                        if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
+                                            !(state.isLoadingMore) &&
+                                            state.todos.length < state.totalTodos) {
+                                          context.read<TodoBloc>().add(LoadMoreTodos(
+                                            limit: 10,
+                                            skip: context.read<TodoBloc>().skip,
+                                          ));
+                                          return true;
+                                        }
+                                        return false;
+                                      },
+                                      child: ListView.builder(
+                                        controller: _scrollController,
+                                        itemCount: todos.length + (_isPaginating ? 1 : 0),
+                                        itemBuilder: (context, index) {
+                                          if (index == todos.length) {
+                                            return Center(
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: CircularProgressIndicator(
+                                                  color: progressIndicatorColor,
+                                                ),
+                                              ),
+                                            );
+                                          }
+
+                                          final todo = todos[index];
+                                          final isLocalTodo = savedTodos.any((savedTodo) => savedTodo.id == todo.id);
+
+                                          return ListTile(
+                                            title: Text(todo.todo),
+                                            leading: Checkbox(
+                                              activeColor: progressIndicatorColor,
+                                              value: todo.completed,
+                                              onChanged: (bool? value) {
+                                                if (isLocalTodo) {
+                                                  final updatedTodo = todo.copyWith(completed: value ?? false);
+                                                  setState(() {
+                                                    final indexInLocal = savedTodos.indexWhere((t) => t.id == todo.id);
+                                                    if (indexInLocal != -1) {
+                                                      savedTodos[indexInLocal] = updatedTodo;
+                                                      _saveTodosToSharedPreferences();
+                                                      _showLocalUpdateDialog(context, updatedTodo, 'updated');
+                                                    }
+                                                  });
+                                                } else {
+                                                  final updatedTodo = todo.copyWith(completed: value ?? false);
+                                                  context.read<TodoBloc>().add(UpdateTodo(updatedTodo));
+                                                }
+                                              },
+                                            ),
+                                            trailing: IconButton(
+                                              icon: Icon(
+                                                Icons.delete,
+                                                color: (todo.isDeleted ?? false) ? Colors.black : Colors.red,
+                                              ),
+                                              onPressed: () {
+                                                _showDeleteConfirmation(context, todo, isLocalTodo);
+                                              },
+                                            ),
+                                          );
+                                        },
+                                      )
+                                  );
+                                } else if (state is TodoError) {
+                                  return Center(child: Text(state.message));
+                                }
+                                return Center(child: CircularProgressIndicator());
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-          ],
+              SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
