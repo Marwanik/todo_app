@@ -82,13 +82,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text(Cancel),
+              child:  Text(Cancel,style: TextStyle(color: MainColor),),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Delete'),
+              child:  Text(Delete,style: TextStyle(color: MainColor),),
               onPressed: () {
                 isConfirmed = true;
                 Navigator.of(context).pop();
@@ -132,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
-                          child: const Text(OK),
+                          child: Text(OK,style: TextStyle(color: MainColor),),
                         ),
                       ],
                     ),                  ],
@@ -170,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text(OK),
+              child:  Text(OK,style: TextStyle(color: MainColor),),
             ),
           ],
         );
@@ -195,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text(OK),
+              child:  Text(OK,style: TextStyle(color: MainColor),),
             ),
           ],
         );
@@ -220,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text(OK),
+              child:  Text(OK,style: TextStyle(color: MainColor),),
             ),
           ],
         );
@@ -249,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text(OK),
+              child:  Text(OK,style: TextStyle(color: MainColor),),
             ),
           ],
         );
@@ -384,7 +384,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     _addNewTodoToSaved(result);
                                   }
                                 },
-                                icon: const Icon(Icons.add),
+                                icon:  Icon(Icons.add,color: MainColor),
                               ),
                             ],
                           ),

@@ -51,8 +51,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       ),
     );
 
-
-
     _controller.forward();
 
     Timer(const Duration(seconds: 3), _navigateAfterSplash);
@@ -100,47 +98,45 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return BackgroundWidget(
-      child: Scaffold(
-        body: Center(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              AnimatedBuilder(
-                animation: _circleScaleUpAnimation,
-                builder: (context, child) {
-                  double scaleValue = _circleScaleUpAnimation.value;
-                  if (_circleScaleDownAnimation.value < 1) {
-                    scaleValue = _circleScaleDownAnimation.value;
-                  }
-                  return Transform.scale(
-                    scale: scaleValue,
-                    child: Container(
-                      width: 150,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        color: MainColor,
-                        shape: BoxShape.circle,
-                      ),
+      child: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AnimatedBuilder(
+              animation: _circleScaleUpAnimation,
+              builder: (context, child) {
+                double scaleValue = _circleScaleUpAnimation.value;
+                if (_circleScaleDownAnimation.value < 1) {
+                  scaleValue = _circleScaleDownAnimation.value;
+                }
+                return Transform.scale(
+                  scale: scaleValue,
+                  child: Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      color: MainColor,
+                      shape: BoxShape.circle,
                     ),
-                  );
-                },
-              ),
-              // Logo fade-in animation
-              AnimatedBuilder(
-                animation: _logoFadeInAnimation,
-                builder: (context, child) {
-                  return Opacity(
-                    opacity: _logoFadeInAnimation.value,
-                    child: Image.asset(
-                      'assets/images/splash/logo.png',
-                      width: 200,
-                      height: 200,
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
+                  ),
+                );
+              },
+            ),
+            // Logo fade-in animation
+            AnimatedBuilder(
+              animation: _logoFadeInAnimation,
+              builder: (context, child) {
+                return Opacity(
+                  opacity: _logoFadeInAnimation.value,
+                  child: Image.asset(
+                    'assets/images/splash/logo.png',
+                    width: 200,
+                    height: 200,
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

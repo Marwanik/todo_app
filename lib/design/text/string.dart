@@ -16,7 +16,7 @@ const String No = "No";
 const String OK = "OK";
 const String Unknown = "Unknown";
 const String TodoUpdatedviaAPI = "Todo Updated via API";
-const String WaitForSuccessDeleting = "Wait For Success Deleting";
+const String WaitForSuccessDeleting = "Success Deleting!";
 const String Areyousure = "Are you sure you want to delete this todo?";
 const String Cancel = "Cancel";
 const String added = "added";
@@ -24,6 +24,7 @@ const String Pleaseenteratask = "Please enter a task";
 const String AddtoList = "Add to List";
 const String Enteryourtask = "Enter your task";
 const String Addwhatyouwant= "Add what you want to do later on...";
+const String Delete = "Delete";
 
 
 

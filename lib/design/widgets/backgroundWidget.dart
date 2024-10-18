@@ -9,11 +9,11 @@ class BackgroundWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: whiteColor,
+      backgroundColor:BackGround,
       body: SafeArea(
         child: Stack(
           children: [
-
+            // Background image circles
             Positioned(
               top: -70,
               left: -100,
@@ -25,7 +25,7 @@ class BackgroundWidget extends StatelessWidget {
             ),
 
         
-
+            // The actual page content
             SafeArea(
               child: child,
             ),

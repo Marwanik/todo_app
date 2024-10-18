@@ -5,3 +5,4 @@ Color FirstTextColor = Colors.black;
 Color? SecondTextColor = Colors.grey[700];
 Color ErrorColor = Color(0xF0FF0000);
 Color whiteColor = Colors.white;
+Color BackGround =Color(0xffebebeb);
