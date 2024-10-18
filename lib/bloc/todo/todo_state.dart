@@ -17,7 +17,7 @@ class TodoLoaded extends TodoState {
   final bool isLoadingMore;
   final int totalTodos;
 
-  TodoLoaded({required this.todos, required this.isLoadingMore, required this.totalTodos});
+  const TodoLoaded({required this.todos, required this.isLoadingMore, required this.totalTodos});
 
   @override
   List<Object> get props => [todos, isLoadingMore, totalTodos];
@@ -26,7 +26,7 @@ class TodoLoaded extends TodoState {
 class TodoError extends TodoState {
   final String message;
 
-  TodoError(this.message);
+  const TodoError(this.message);
 
   @override
   List<Object> get props => [message];
@@ -35,7 +35,7 @@ class TodoError extends TodoState {
 class TodoUpdated extends TodoState {
   final Todo todo;
 
-  TodoUpdated(this.todo);
+  const TodoUpdated(this.todo);
 
   @override
   List<Object> get props => [todo];
@@ -43,7 +43,7 @@ class TodoUpdated extends TodoState {
 class TodoDeleted extends TodoState {
   final Todo deletedTodo;
 
-  TodoDeleted(this.deletedTodo);
+  const TodoDeleted(this.deletedTodo);
 
   @override
   List<Object> get props => [deletedTodo];
@@ -51,7 +51,7 @@ class TodoDeleted extends TodoState {
 class TodoDeletedSuccess extends TodoState {
   final Todo deletedTodo;
 
-  TodoDeletedSuccess(this.deletedTodo);
+  const TodoDeletedSuccess(this.deletedTodo);
 
   @override
   List<Object> get props => [deletedTodo];

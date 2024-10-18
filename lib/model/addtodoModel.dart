@@ -9,7 +9,7 @@ class AddTodoModel {
     required this.userId,
   });
 
-  // Add fromJson method to convert from JSON
+
   factory AddTodoModel.fromJson(Map<String, dynamic> json) {
     return AddTodoModel(
       todo: json['todo'],
@@ -18,7 +18,7 @@ class AddTodoModel {
     );
   }
 
-  // Add toJson method to convert to JSON
+
   Map<String, dynamic> toJson() {
     return {
       'todo': todo,
@@ -27,7 +27,7 @@ class AddTodoModel {
     };
   }
 
-  // Add copyWith method to create modified copies
+
   AddTodoModel copyWith({
     String? todo,
     bool? completed,

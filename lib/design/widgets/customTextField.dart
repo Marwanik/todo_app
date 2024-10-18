@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todoapp/design/color/color.dart';
 
 class CustomTextField extends StatefulWidget {
   final String hintText;
@@ -26,7 +27,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       decoration: InputDecoration(
         hintText: widget.hintText,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: whiteColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,

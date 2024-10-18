@@ -3,8 +3,8 @@ class Todo {
   final String todo;
   final bool completed;
   final int userId;
-  final bool? isDeleted; // Add isDeleted
-  final String? deletedOn; // Make sure this field exists to store the deletion time
+  final bool? isDeleted;
+  final String? deletedOn;
 
   Todo({
     required this.id,
@@ -12,7 +12,7 @@ class Todo {
     required this.completed,
     required this.userId,
     this.isDeleted,
-    required this.deletedOn, // Include this field
+    required this.deletedOn,
   });
 
   factory Todo.fromJson(Map<String, dynamic> json) {
@@ -22,7 +22,7 @@ class Todo {
       completed: json['completed'],
       userId: json['userId'],
       isDeleted: json['isDeleted'],
-      deletedOn: json['deletedOn'], // Ensure this is parsed from API response
+      deletedOn: json['deletedOn'],
     );
   }
 
@@ -33,12 +33,12 @@ class Todo {
       'completed': completed,
       'userId': userId,
       'isDeleted': isDeleted,
-      'deletedOn': deletedOn, // Include in serialization
+      'deletedOn': deletedOn,
     };
   }
 
 
-// Method to create a copy of a Todo with optional new values
+
   Todo copyWith({
     int? id,
     String? todo,
@@ -57,7 +57,7 @@ class Todo {
     );
   }
 
-  // Override toString method for better debugging output
+
   @override
   String toString() {
     return 'Todo { id: $id, todo: $todo, completed: $completed, userId: $userId, isDeleted: $isDeleted, deletedOn: $deletedOn }';

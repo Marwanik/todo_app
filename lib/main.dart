@@ -5,12 +5,12 @@ import 'package:todoapp/bloc/onboarding/onboarding_event.dart';
 import 'package:todoapp/bloc/splash/splash_bloc.dart';
 import 'package:todoapp/bloc/todo/todo_bloc.dart';
 import 'package:todoapp/bloc/todo/todo_event.dart';
-import 'package:todoapp/bloc/addtodo/addtodo_bloc.dart'; // Import AddTodoBloc
+import 'package:todoapp/bloc/addtodo/addtodo_bloc.dart';
 import 'package:todoapp/core/bloc/app_manger_bloc.dart';
 import 'package:todoapp/core/config/observerBloc.dart';
 import 'package:todoapp/core/config/serviceLocator.dart';
 import 'package:todoapp/service/todoService.dart';
-import 'package:todoapp/service/addTodoService.dart'; // Import AddTodoService
+import 'package:todoapp/service/addTodoService.dart';
 import 'package:todoapp/view/spalsh/splashScreen.dart';
 
 Future<void> main() async {
@@ -37,13 +37,13 @@ class MyApp extends StatelessWidget {
           create: (context) => TodoBloc(core.get<TodoService>())..add(FetchTodos()),
         ),
         BlocProvider(
-          create: (context) => AddTodoBloc(core.get<AddTodoService>()), // Add AddTodoBloc provider
+          create: (context) => AddTodoBloc(core.get<AddTodoService>()),
         ),
         BlocProvider(
-          create: (context) => OnboardingBloc()..add(CheckOnboardingStatus()), // Add OnboardingBloc provider
+          create: (context) => OnboardingBloc()..add(CheckOnboardingStatus()),
         ),
       ],
-      child: MaterialApp(
+      child: const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: SplashScreen(),
       ),

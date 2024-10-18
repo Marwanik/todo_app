@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todoapp/bloc/auth/auth_bloc.dart';
+import 'package:todoapp/design/color/color.dart';
+import 'package:todoapp/design/text/string.dart';
 import 'package:todoapp/design/widgets/backgroundWidget.dart';
 import 'package:todoapp/design/widgets/customButton.dart';
 import 'package:todoapp/design/widgets/customTextField.dart';
@@ -9,6 +11,8 @@ import 'package:todoapp/view/home/homeScreen.dart';
 import 'package:todoapp/model/authModel.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -59,13 +63,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Image
                   Image.asset('assets/images/login/login.png'),
 
-                  const Text(
-                    'Welcome!',
+                  Text(
+                    Welcome,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: FirstTextColor,
                     ),
                   ),
 
@@ -73,43 +77,41 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // Email text field
                   CustomTextField(
-                    hintText: 'User Name',
+                    hintText: UserName,
                     controller: usernameController,
                   ),
 
                   const SizedBox(height: 30),
 
-                  // Password text field with toggle visibility
+
                   CustomTextField(
-                    hintText: 'Password',
+                    hintText: Password,
                     isPasswordField: true,
                     controller: passwordController,
                   ),
 
                   const SizedBox(height: 20),
 
-                  // Forgot Password link
                   Align(
                     alignment: Alignment.center,
                     child: TextButton(
                       onPressed: () {
-                        // Forgot password action
                       },
-                      child: const Text(
-                        'Forgot Password?',
-                        style: TextStyle(color: Colors.teal),
+                      child: Text(
+                        ForgetPassword,
+                        style: TextStyle(color: MainColor),
                       ),
                     ),
                   ),
 
                   const SizedBox(height: 20),
 
-                  // BlocConsumer to handle UI based on Bloc state
+
                   BlocConsumer<AuthBloc, AuthState>(
                     listener: (context, state) {
                       if (state is SuccessToLogIn) {
                         _saveLoginData(
-                            usernameController.text, 'dummy_token'); // Replace 'dummy_token' with actual token
+                            usernameController.text, 'dummy_token');
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -124,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     builder: (context, state) {
                       if (state is Loading) {
-                        return Center(child: CircularProgressIndicator());
+                        return const Center(child: CircularProgressIndicator());
                       }
 
                       return CustomButton(
@@ -134,7 +136,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           final password = passwordController.text.trim();
 
                           if (username.isNotEmpty && password.isNotEmpty) {
-                            // Dispatch the login event with the user data
                             BlocProvider.of<AuthBloc>(context).add(
                               LogIn(
                                 user: UserModel(
@@ -146,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text("Please fill in all fields")),
+                                  content: Text(Pleasefillinallfields)),
                             );
                           }
                         },
@@ -156,19 +157,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 20),
 
-                  // Sign up link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don't have an account? "),
+                      const Text(DontHaveAccount),
                       GestureDetector(
                         onTap: () {
-                          // Navigate to sign up page
+
                         },
-                        child: const Text(
+                        child: Text(
                           'Sign Up',
                           style: TextStyle(
-                            color: Colors.teal,
+                            color: MainColor,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

@@ -12,16 +12,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc() : super(AuthInitial()) {
     on<LogIn>((event, emit) async {
       emit(Loading());
-
-      // Log for debugging
-
       ResultModel result = await AuthServiceImp().logIn(event.user);
-
       if (result is DataSuccess) {
-        // Log success
         emit(SuccessToLogIn());
       } else {
-        // Log failure with reason
         emit(FailedToLogIn());
       }
     });

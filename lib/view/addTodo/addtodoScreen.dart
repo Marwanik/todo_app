@@ -5,24 +5,28 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:todoapp/bloc/addtodo/addtodo_bloc.dart';
 import 'package:todoapp/bloc/addtodo/addtodo_event.dart';
 import 'package:todoapp/bloc/addtodo/addtodo_state.dart';
+import 'package:todoapp/design/text/string.dart';
 import 'package:todoapp/design/widgets/backgroundWidget.dart';
 import 'package:todoapp/design/widgets/customButton.dart';
 import 'package:todoapp/design/widgets/customTextField.dart';
 import 'package:todoapp/model/addTodoModel.dart';
-import 'package:todoapp/model/todoModel.dart'; // Import Todo model
+import 'package:todoapp/model/todoModel.dart';
+
+import '../../design/color/color.dart';
 
 class AddTodoScreen extends StatelessWidget {
   final TextEditingController _todoController = TextEditingController();
-  final Color progressIndicatorColor = const Color(0xF055847A); // Custom color
 
-  // Save the new todo to SharedPreferences
+  AddTodoScreen({super.key});
+
+
   Future<void> _saveTaskToSharedPreferences(Todo task) async {
     final prefs = await SharedPreferences.getInstance();
     final savedTodosString = prefs.getString('saved_todos') ?? '[]';
     final List<dynamic> savedTodosJson = jsonDecode(savedTodosString);
 
-    savedTodosJson.insert(0, task.toJson()); // Add new todo at the start of the list
-    await prefs.setString('saved_todos', jsonEncode(savedTodosJson)); // Save the updated list
+    savedTodosJson.insert(0, task.toJson());
+    await prefs.setString('saved_todos', jsonEncode(savedTodosJson));
   }
 
   @override
@@ -40,30 +44,30 @@ class AddTodoScreen extends StatelessWidget {
                   'assets/images/addtodo/addtodo.png',
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               Text(
-                'Add what you want to do later on...',
+                Addwhatyouwant,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Color(0xF055847A),
+                  color: MainColor,
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: CustomTextField(
                   controller: _todoController,
-                  hintText: 'Enter your task',
+                  hintText: Enteryourtask,
                 ),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               BlocConsumer<AddTodoBloc, AddTodoState>(
                 listener: (context, state) {
                   if (state is AddTodoSuccess) {
                     final todoText = _todoController.text.trim();
                     if (todoText.isNotEmpty) {
-                      // Convert AddTodoModel to Todo before returning
+
                       final newTodo = Todo(
                         id: DateTime.now().millisecondsSinceEpoch,
                         todo: todoText,
@@ -71,10 +75,8 @@ class AddTodoScreen extends StatelessWidget {
                         userId: 5, deletedOn: '',
                       );
 
-                      // Save the new task to SharedPreferences
                       _saveTaskToSharedPreferences(newTodo);
 
-                      // Pop with Todo object (not AddTodoModel)
                       Navigator.pop(context, newTodo);
                     }
                   } else if (state is AddTodoFailure) {
@@ -86,11 +88,11 @@ class AddTodoScreen extends StatelessWidget {
                 builder: (context, state) {
                   if (state is AddTodoLoading) {
                     return CircularProgressIndicator(
-                  color: progressIndicatorColor,
+                  color: MainColor,
                   );
                   }
                   return CustomButton(
-                    text: 'Add to List',
+                    text: AddtoList,
                     onPressed: () {
                       final todoText = _todoController.text.trim();
                       if (todoText.isNotEmpty) {
@@ -100,13 +102,12 @@ class AddTodoScreen extends StatelessWidget {
                           userId: 5,
                         );
 
-                        // Dispatch the AddNewTodo event to the Bloc
                         context.read<AddTodoBloc>().add(
                           AddNewTodo(newTodo),
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Please enter a task')),
+                          const SnackBar(content: Text(Pleaseenteratask)),
                         );
                       }
                     },

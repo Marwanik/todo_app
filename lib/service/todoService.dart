@@ -34,28 +34,17 @@ class TodoService {
         ),
       );
 
-      // Print the full response for debugging
-      print('Response Status: ${response.statusCode}');
-      print('Response Data: ${response.data}');
-
-      // Check if the response was successful
       if (response.statusCode == 200) {
-        return Todo.fromJson(response.data); // Directly decode from Dio response
+        return Todo.fromJson(response.data);
       } else {
-        print('Unexpected status code: ${response.statusCode}');
-        print('Response Data: ${response.data}');
         throw Exception('Failed to update Todo: Unexpected status code');
       }
     } on DioException catch (e) {
-      // Print detailed error information
-      print('DioException caught: ${e.response?.statusCode}');
-      print('Error response data: ${e.response?.data}');
-      print('Error message: ${e.message}');
+
 
       throw Exception('Error updating todo: ${e.response?.statusCode ?? 'Unknown error'}');
     } catch (e) {
-      // Print any other errors
-      print('General exception caught: $e');
+
       throw Exception('Error updating todo: $e');
     }
   }
@@ -65,13 +54,11 @@ class TodoService {
     try {
       final response = await _dio.delete('$baseUrl/todos/$id');
       if (response.statusCode == 200) {
-        print('Delete successful: ${response.data}');
         return Todo.fromJson(response.data);
       } else {
         throw Exception('Failed to delete Todo');
       }
     } on DioException catch (e) {
-      print('Error deleting todo: ${e.response?.statusCode ?? 'Unknown error'}');
       throw Exception('Error deleting todo: ${e.response?.statusCode ?? 'Unknown error'}');
     }
   }

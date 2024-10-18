@@ -6,7 +6,11 @@ import 'package:todoapp/view/home/homeScreen.dart';
 import 'package:todoapp/view/login/login.dart';
 import 'package:todoapp/view/onboarding/onboardingScreen.dart';
 
+import '../../design/color/color.dart';
+
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -51,25 +55,21 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
-    // After the splash screen animations are complete, check what screen to navigate to.
     Timer(const Duration(seconds: 3), _navigateAfterSplash);
   }
 
   Future<void> _navigateAfterSplash() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Check if it's the first time the app is being opened
     final isFirstTime = prefs.getBool('isFirstTime') ?? true;
 
     if (isFirstTime) {
-      // If it's the first time, set the flag to false and go to onboarding
       await prefs.setBool('isFirstTime', false);
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => OnboardingScreen()),
+        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
       );
     } else {
-      // If not the first time, check if the user is logged in
       _checkLoginStatus();
     }
   }
@@ -79,16 +79,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
     if (isLoggedIn) {
-      // If the user is logged in, go to the home screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } else {
-      // If the user is not logged in, go to the login screen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
     }
   }
@@ -107,7 +105,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Circle scale up and down animation
               AnimatedBuilder(
                 animation: _circleScaleUpAnimation,
                 builder: (context, child) {
@@ -120,8 +117,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     child: Container(
                       width: 150,
                       height: 150,
-                      decoration: const BoxDecoration(
-                        color: Color(0xF055847A),
+                      decoration: BoxDecoration(
+                        color: MainColor,
                         shape: BoxShape.circle,
                       ),
                     ),

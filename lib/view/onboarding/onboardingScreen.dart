@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todoapp/bloc/onboarding/onboarding_bloc.dart';
 import 'package:todoapp/bloc/onboarding/onboarding_event.dart';
+import 'package:todoapp/design/color/color.dart';
+import 'package:todoapp/design/text/string.dart';
 import 'package:todoapp/design/widgets/backgroundWidget.dart';
 import 'package:todoapp/design/widgets/customButton.dart';
 import 'package:todoapp/view/login/login.dart';
 
 class OnboardingScreen extends StatelessWidget {
+  const OnboardingScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BackgroundWidget(
@@ -19,36 +23,38 @@ class OnboardingScreen extends StatelessWidget {
               'assets/images/onboarding/onboarding.png',
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
-            'Get things done with TODOo',
+            GetthingsdonewithTODOo,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: FirstTextColor,
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30.0),
             child: Text(
-              'Lorem ipsum dolor sit amet, consectetur adipisicing. Maxime, tempore! Animi nemo aut atque, deleniti nihil dolorem repellendus.',
+              subtitle,
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey[700],
+                color: SecondTextColor,
               ),
               textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(height: 40),
+          const SizedBox(height: 40),
           CustomButton(
-            text: 'Get Started',
+            text: GetStarted,
             onPressed: () {
-              context.read<OnboardingBloc>().add(CompleteOnboarding()); // Complete onboarding
+              context
+                  .read<OnboardingBloc>()
+                  .add(CompleteOnboarding()); // Complete onboarding
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
             },
           ),

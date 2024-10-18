@@ -8,5 +8,5 @@ GetIt core = GetIt.instance;
 setup() async {
   core.registerSingleton(await SharedPreferences.getInstance());
   core.registerSingleton<TodoService>(TodoService());
-  core.registerSingleton<AddTodoService>(AddTodoService()); // Register AddTodoService
+  core.registerSingleton<AddTodoService>(AddTodoService());
 }

@@ -8,10 +8,8 @@ import 'package:todoapp/model/authModel.dart';
 import 'package:todoapp/model/errorHandling.dart';
 import 'package:todoapp/service/authService.dart';
 
-// Define the events
 part 'app_manger_event.dart';
 
-// Define the states
 part 'app_manger_state.dart';
 
 class AppManagerBloc extends Bloc<AppManagerEvent, AppManagerState> {

@@ -24,7 +24,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   Future<void> _onCompleteOnboarding(
       CompleteOnboarding event, Emitter<OnboardingState> emit) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isFirstTime', false); // Mark onboarding as completed
+    await prefs.setBool('isFirstTime', false);
     emit(SkipOnboarding());
   }
 }
